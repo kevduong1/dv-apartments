@@ -171,6 +171,30 @@ export const tenants = pgTable(
   ],
 )
 
+/**
+ * A tenant's editable monthly rent ledger — one row per month of a lease. Each
+ * row records what was charged (`amount_due`, defaulting to contract rent), what
+ * was paid (`amount_paid`), and a free-text `note`. The running balance is
+ * derived (Σ due − Σ paid), never stored. This is the data behind the per-tenant
+ * balance sheet.
+ */
+export const rentLedger = pgTable("rent_ledger", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "cascade" }),
+  /** The month this row covers, stored as its first day: YYYY-MM-01. */
+  periodMonth: date("period_month").notNull(),
+  /** Rent charged for the month. Stored as a decimal string — never a float. */
+  amountDue: numeric("amount_due", { precision: 14, scale: 2 }).notNull(),
+  /** Rent collected for the month. Stored as a decimal string — never a float. */
+  amountPaid: numeric("amount_paid", { precision: 14, scale: 2 })
+    .notNull()
+    .default("0.00"),
+  note: text("note"),
+  ...syncColumns,
+})
+
 export type Entity = typeof entities.$inferSelect
 export type NewEntity = typeof entities.$inferInsert
 export type Property = typeof properties.$inferSelect
@@ -183,3 +207,5 @@ export type Transaction = typeof transactions.$inferSelect
 export type NewTransaction = typeof transactions.$inferInsert
 export type Tenant = typeof tenants.$inferSelect
 export type NewTenant = typeof tenants.$inferInsert
+export type RentLedger = typeof rentLedger.$inferSelect
+export type NewRentLedger = typeof rentLedger.$inferInsert

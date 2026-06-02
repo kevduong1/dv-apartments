@@ -11,7 +11,6 @@ import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
 import { useSelectedEntity } from "@/components/entity-context"
 import { PropertiesList } from "@/components/properties-list"
-import { ScopedStats } from "@/components/scoped-stats"
 import { SeriesGrid } from "@/components/series-grid"
 import { TenantsList } from "@/components/tenants-list"
 import { TransactionsTable } from "@/components/transactions-table"
@@ -98,8 +97,6 @@ export default function EntityPage() {
         </AddTransactionDialog>
       </div>
 
-      <ScopedStats scope={scope} />
-
       {isParent ? (
         <Tabs defaultValue="series">
           <TabsList>
@@ -148,11 +145,7 @@ function DetailSkeleton() {
     <div className="flex flex-col gap-6">
       <Skeleton className="h-5 w-48" />
       <Skeleton className="h-9 w-64" />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-4xl" />
-        ))}
-      </div>
+      <Skeleton className="h-12 w-80 rounded-3xl" />
       <Skeleton className="h-64 w-full rounded-4xl" />
     </div>
   )

@@ -1,11 +1,26 @@
 import type { AppDb } from "./client"
-import { categories, entities, properties, tenants, transactions, units } from "./schema"
+import {
+  categories,
+  entities,
+  properties,
+  rentLedger,
+  tenants,
+  transactions,
+  units,
+} from "./schema"
 
 /** ISO date (YYYY-MM-DD) `days` before today. */
 function isoDaysAgo(days: number): string {
   const d = new Date()
   d.setDate(d.getDate() - days)
   return d.toISOString().slice(0, 10)
+}
+
+/** First of the month (YYYY-MM-01) `months` before the current month. */
+function monthsAgo(months: number): string {
+  const d = new Date()
+  d.setMonth(d.getMonth() - months)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`
 }
 
 /**
@@ -86,7 +101,7 @@ export async function seedIfEmpty(db: AppDb): Promise<void> {
 
   // --- Tenants: leases tied to units. One unit (Apt 4) is left vacant, and
   // there's a pending move-in and a past tenant so every status renders. ---
-  await db.insert(tenants).values([
+  const tenantRows = await db.insert(tenants).values([
     {
       entityId: mapleLlc.id, propertyId: mapleProp.id, unitId: mapleUnits[0].id,
       name: "Jordan Reyes", email: "jordan.reyes@example.com", phone: "(512) 555-0148",
@@ -130,7 +145,24 @@ export async function seedIfEmpty(db: AppDb): Promise<void> {
       leaseStart: "2022-06-01", leaseEnd: "2024-05-31",
       rentAmount: oakUnits[3].rentAmount, status: "past",
     },
-  ])
+  ]).returning()
+
+  // --- Rent ledger: a few months of balance-sheet history for the first two
+  // active tenants, so the tenant balance sheet is populated on a fresh DB.
+  // One month is paid late (a note) and one is left partially paid. ---
+  const ledgerRows = tenantRows.slice(0, 2).flatMap((t) => {
+    const rent = t.rentAmount ?? "0.00"
+    const partial = (Number(rent) - 200).toFixed(2)
+    return [
+      { tenantId: t.id, periodMonth: monthsAgo(2), amountDue: rent, amountPaid: rent, note: null },
+      {
+        tenantId: t.id, periodMonth: monthsAgo(1), amountDue: rent, amountPaid: rent,
+        note: "Paid a few days late",
+      },
+      { tenantId: t.id, periodMonth: monthsAgo(0), amountDue: rent, amountPaid: partial, note: "Partial — balance carried" },
+    ]
+  })
+  await db.insert(rentLedger).values(ledgerRows)
 
   // --- Categories (the categorized ledger) ---
   const categoryRows = await db

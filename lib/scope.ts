@@ -9,6 +9,7 @@ export type Scope =
   | { kind: "parent"; entityId: string }
   | { kind: "series"; entityId: string }
   | { kind: "property"; propertyId: string }
+  | { kind: "unit"; unitId: string }
 
 /**
  * Builds a SQL filter fragment (prefixed with ` AND `) plus its params for a
@@ -21,7 +22,7 @@ export type Scope =
  */
 export function scopeFilter(
   scope: Scope,
-  cols: { entityId: string; propertyId: string },
+  cols: { entityId: string; propertyId: string; unitId?: string },
 ): { clause: string; params: string[] } {
   switch (scope.kind) {
     case "all":
@@ -35,5 +36,7 @@ export function scopeFilter(
       }
     case "property":
       return { clause: ` AND ${cols.propertyId} = $1`, params: [scope.propertyId] }
+    case "unit":
+      return { clause: ` AND ${cols.unitId} = $1`, params: [scope.unitId] }
   }
 }

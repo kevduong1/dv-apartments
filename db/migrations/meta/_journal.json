@@ -15,6 +15,13 @@
       "when": 1780376198975,
       "tag": "0001_loose_phantom_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780413607798,
+      "tag": "0002_happy_black_bolt",
+      "breakpoints": true
     }
   ]
 }

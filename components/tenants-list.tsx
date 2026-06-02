@@ -1,8 +1,9 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useLiveQuery } from "@electric-sql/pglite-react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { PlusSignIcon } from "@hugeicons/core-free-icons"
+import { ArrowRight01Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
 
 import { AddTenantDialog } from "@/components/add-tenant-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +48,7 @@ export function TenantsList({
   scope: Scope
   add?: { propertyId?: string; entityId?: string }
 }) {
+  const router = useRouter()
   const f = scopeFilter(scope, { entityId: "te.entity_id", propertyId: "te.property_id" })
   const result = useLiveQuery<TenantRow>(
     `SELECT te.id, te.name, te.status,
@@ -87,13 +89,14 @@ export function TenantsList({
               )}
               <TableHead className="hidden sm:table-cell">Lease</TableHead>
               <TableHead className="text-right">Rent</TableHead>
+              <TableHead className="w-8" aria-label="Open" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {tenants.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={showProperty ? 5 : 4}
+                  colSpan={showProperty ? 6 : 5}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
                   No tenants yet.
@@ -101,7 +104,11 @@ export function TenantsList({
               </TableRow>
             ) : (
               tenants.map((t) => (
-                <TableRow key={t.id}>
+                <TableRow
+                  key={t.id}
+                  onClick={() => router.push(`/tenants/${t.id}`)}
+                  className="group cursor-pointer"
+                >
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{t.name}</span>
@@ -128,6 +135,12 @@ export function TenantsList({
                   </TableCell>
                   <TableCell className="text-right font-medium tabular-nums">
                     {t.rentAmount ? formatMoney(t.rentAmount) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                    />
                   </TableCell>
                 </TableRow>
               ))

@@ -44,7 +44,11 @@ export function TransactionsTable({
   title?: string
   description?: string
 }) {
-  const f = scopeFilter(scope, { entityId: "t.entity_id", propertyId: "t.property_id" })
+  const f = scopeFilter(scope, {
+    entityId: "t.entity_id",
+    propertyId: "t.property_id",
+    unitId: "t.unit_id",
+  })
   const transactions =
     useLiveQuery<TxRow>(
       `SELECT t.id, t.occurred_on AS "occurredOn", t.amount, t.memo,

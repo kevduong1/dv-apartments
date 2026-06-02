@@ -2,15 +2,14 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useLiveQuery } from "@electric-sql/pglite-react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { PlusSignIcon } from "@hugeicons/core-free-icons"
+import { ArrowRight01Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
 
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
 import { useSelectedEntity } from "@/components/entity-context"
-import { ScopedStats } from "@/components/scoped-stats"
 import { TenantsList } from "@/components/tenants-list"
 import { TransactionsTable } from "@/components/transactions-table"
 import { Badge } from "@/components/ui/badge"
@@ -110,8 +109,6 @@ export default function PropertyPage() {
         </AddTransactionDialog>
       </div>
 
-      <ScopedStats scope={scope} />
-
       <Tabs defaultValue="units">
         <TabsList>
           <TabsTrigger value="units">Units</TabsTrigger>
@@ -137,6 +134,7 @@ export default function PropertyPage() {
 
 /** The units within one property, with their current active occupant. */
 function UnitsTable({ propertyId }: { propertyId: string }) {
+  const router = useRouter()
   const units =
     useLiveQuery<UnitRow>(
       `SELECT u.id, u.label, u.bedrooms, u.bathrooms,
@@ -161,13 +159,14 @@ function UnitsTable({ propertyId }: { propertyId: string }) {
               <TableHead className="hidden sm:table-cell">Beds / baths</TableHead>
               <TableHead>Occupant</TableHead>
               <TableHead className="text-right">Rent</TableHead>
+              <TableHead className="w-8" aria-label="Open" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {units.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={5}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
                   No units yet.
@@ -175,7 +174,11 @@ function UnitsTable({ propertyId }: { propertyId: string }) {
               </TableRow>
             ) : (
               units.map((u) => (
-                <TableRow key={u.id}>
+                <TableRow
+                  key={u.id}
+                  onClick={() => router.push(`/units/${u.id}`)}
+                  className="group cursor-pointer"
+                >
                   <TableCell className="font-medium">{u.label}</TableCell>
                   <TableCell className="hidden text-muted-foreground sm:table-cell">
                     {u.bedrooms ?? "—"} bd / {u.bathrooms ?? "—"} ba
@@ -192,6 +195,12 @@ function UnitsTable({ propertyId }: { propertyId: string }) {
                   <TableCell className="text-right font-medium tabular-nums">
                     {u.rentAmount ? formatMoney(u.rentAmount) : "—"}
                   </TableCell>
+                  <TableCell className="text-right">
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                    />
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -207,11 +216,7 @@ function DetailSkeleton() {
     <div className="flex flex-col gap-6">
       <Skeleton className="h-5 w-56" />
       <Skeleton className="h-9 w-64" />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-4xl" />
-        ))}
-      </div>
+      <Skeleton className="h-12 w-72 rounded-3xl" />
       <Skeleton className="h-64 w-full rounded-4xl" />
     </div>
   )
