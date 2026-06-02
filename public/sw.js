@@ -24,13 +24,18 @@ const CACHE_NAME = `dv-books-${CACHE_VERSION}`
 const APP_SHELL = ["/", "/manifest.webmanifest"]
 
 self.addEventListener("install", (event) => {
+  // Precache the shell. We intentionally do NOT call skipWaiting() here: when an
+  // update installs over an existing worker we want it to wait so the app can
+  // show the blocking "Click to update" prompt. The user triggers activation by
+  // clicking it (see the SKIP_WAITING message handler below). The very first
+  // install has no active worker to wait behind, so it activates immediately and
+  // the app works offline right away.
   event.waitUntil(
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_SHELL))
-      // Don't block activation if a shell URL can't be fetched at install time.
-      .catch(() => undefined)
-      .then(() => self.skipWaiting()),
+      // Don't fail the install if a shell URL can't be fetched right now.
+      .catch(() => undefined),
   )
 })
 
