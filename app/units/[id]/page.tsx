@@ -4,17 +4,15 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useLiveQuery } from "@electric-sql/pglite-react"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowRight01Icon, UserIcon } from "@hugeicons/core-free-icons"
 
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
 import { useSelectedEntity } from "@/components/entity-context"
 import { TransactionsTable } from "@/components/transactions-table"
-import { Badge } from "@/components/ui/badge"
+import { UnitTenants } from "@/components/unit-tenants"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { formatDate, formatMoney } from "@/lib/format"
+import { formatMoney } from "@/lib/format"
 import type { Scope } from "@/lib/scope"
 
 interface UnitRow {
@@ -28,21 +26,6 @@ interface UnitRow {
   entityId: string
   entityName: string | null
 }
-
-interface TenantRow {
-  id: string
-  name: string
-  status: "active" | "pending" | "past"
-  leaseStart: string | null
-  leaseEnd: string | null
-  rentAmount: string | null
-}
-
-const STATUS_VARIANT = {
-  active: "secondary",
-  pending: "outline",
-  past: "ghost",
-} as const
 
 export default function UnitPage() {
   const { id } = useParams<{ id: string }>()
@@ -89,74 +72,14 @@ export default function UnitPage() {
         </p>
       </div>
 
-      <UnitTenants unitId={unit.id} />
+      <UnitTenants
+        unitId={unit.id}
+        propertyId={unit.propertyId}
+        entityId={unit.entityId}
+      />
 
       <TransactionsTable scope={scope} limit={25} title="This unit's transactions" />
     </div>
-  )
-}
-
-/** The current occupant (if any) plus everyone who has leased this unit. */
-function UnitTenants({ unitId }: { unitId: string }) {
-  const tenants =
-    useLiveQuery<TenantRow>(
-      `SELECT te.id, te.name, te.status,
-              te.lease_start AS "leaseStart", te.lease_end AS "leaseEnd",
-              te.rent_amount AS "rentAmount"
-       FROM tenants te
-       WHERE te.unit_id = $1 AND te.deleted_at IS NULL
-       ORDER BY (te.status = 'active') DESC, te.lease_start DESC NULLS LAST`,
-      [unitId],
-    )?.rows ?? []
-
-  const current = tenants.find((t) => t.status === "active") ?? null
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tenants</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        {tenants.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No tenants have leased this unit yet.
-          </p>
-        ) : (
-          tenants.map((t) => (
-            <Link
-              key={t.id}
-              href={`/tenants/${t.id}`}
-              className="group flex items-center gap-3 rounded-2xl border p-3 transition-colors hover:bg-muted"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                <HugeiconsIcon icon={UserIcon} className="size-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-2 font-medium">
-                  {t.name}
-                  <Badge
-                    variant={STATUS_VARIANT[t.status]}
-                    className="font-normal capitalize"
-                  >
-                    {t.id === current?.id ? "current" : t.status}
-                  </Badge>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t.leaseStart || t.leaseEnd
-                    ? `${formatDate(t.leaseStart)} – ${formatDate(t.leaseEnd)}`
-                    : "No lease dates"}
-                  {t.rentAmount ? ` · ${formatMoney(t.rentAmount)}` : ""}
-                </p>
-              </div>
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-              />
-            </Link>
-          ))
-        )}
-      </CardContent>
-    </Card>
   )
 }
 

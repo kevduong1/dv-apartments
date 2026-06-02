@@ -10,8 +10,8 @@ import { ArrowRight01Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
 import { useSelectedEntity } from "@/components/entity-context"
-import { TenantsList } from "@/components/tenants-list"
 import { TransactionsTable } from "@/components/transactions-table"
+import { UnitTenants } from "@/components/unit-tenants"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,7 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { formatMoney } from "@/lib/format"
 import type { Scope } from "@/lib/scope"
 
@@ -65,13 +64,26 @@ export default function PropertyPage() {
   )
   const property = result?.rows[0]
 
+  // The property's units drive the layout: a single-unit (single-family) home
+  // shows that unit's tenants + transactions directly, while a multi-unit
+  // property lists its units to drill into.
+  const unitsResult = useLiveQuery<{ id: string }>(
+    `SELECT id FROM units
+     WHERE property_id = $1 AND deleted_at IS NULL
+     ORDER BY label ASC`,
+    [id],
+  )
+
   // Scope the header switcher + Add-Transaction default to the owning series.
   useEffect(() => {
     if (property) setSelectedEntityId(property.entityId)
   }, [property, setSelectedEntityId])
 
-  if (!result) return <DetailSkeleton />
+  if (!result || !unitsResult) return <DetailSkeleton />
   if (!property) return <NotFound />
+
+  const units = unitsResult.rows
+  const onlyUnitId = units.length === 1 ? units[0].id : null
 
   const scope: Scope = { kind: "property", propertyId: property.id }
   const address = [property.address, property.city, property.state]
@@ -109,25 +121,23 @@ export default function PropertyPage() {
         </AddTransactionDialog>
       </div>
 
-      <Tabs defaultValue="units">
-        <TabsList>
-          <TabsTrigger value="units">Units</TabsTrigger>
-          <TabsTrigger value="tenants">Tenants</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-        </TabsList>
-        <TabsContent value="units">
-          <UnitsTable propertyId={property.id} />
-        </TabsContent>
-        <TabsContent value="tenants">
-          <TenantsList
-            scope={scope}
-            add={{ propertyId: property.id, entityId: property.entityId }}
+      {onlyUnitId ? (
+        // Single-family: go straight to the unit — its tenants and the
+        // property's transactions, no units list to click through.
+        <>
+          <UnitTenants
+            unitId={onlyUnitId}
+            propertyId={property.id}
+            entityId={property.entityId}
           />
-        </TabsContent>
-        <TabsContent value="transactions">
           <TransactionsTable scope={scope} limit={25} title="Transactions" />
-        </TabsContent>
-      </Tabs>
+        </>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">Units</h2>
+          <UnitsTable propertyId={property.id} />
+        </div>
+      )}
     </div>
   )
 }

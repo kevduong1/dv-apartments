@@ -42,17 +42,20 @@ const NO_UNIT = "none"
  * Creates a tenant tied to a property (and optionally a unit). Pass
  * `propertyId` to fix the property (e.g. on a property page) or `entityId` to
  * limit the property picker to one series; with neither, every property is
- * selectable. Writes through the repository layer, so live queries update the
+ * selectable. Pass `defaultUnitId` to pre-select the unit (e.g. from a unit
+ * page). Writes through the repository layer, so live queries update the
  * moment it commits. Pass the trigger as children.
  */
 export function AddTenantDialog({
   children,
   propertyId,
   entityId,
+  defaultUnitId,
 }: {
   children: ReactNode
   propertyId?: string
   entityId?: string
+  defaultUnitId?: string
 }) {
   const db = useDb()
 
@@ -60,7 +63,7 @@ export function AddTenantDialog({
   const [saving, setSaving] = useState(false)
 
   const [selectedProperty, setSelectedProperty] = useState(propertyId ?? "")
-  const [unitId, setUnitId] = useState<string>(NO_UNIT)
+  const [unitId, setUnitId] = useState<string>(defaultUnitId ?? NO_UNIT)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
@@ -88,7 +91,7 @@ export function AddTenantDialog({
 
   function reset() {
     setSelectedProperty(propertyId ?? "")
-    setUnitId(NO_UNIT)
+    setUnitId(defaultUnitId ?? NO_UNIT)
     setName("")
     setEmail("")
     setPhone("")

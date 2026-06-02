@@ -12,13 +12,10 @@ import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
 import { useSelectedEntity } from "@/components/entity-context"
 import { PropertiesList } from "@/components/properties-list"
 import { SeriesGrid } from "@/components/series-grid"
-import { TenantsList } from "@/components/tenants-list"
-import { TransactionsTable } from "@/components/transactions-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Scope } from "@/lib/scope"
 
 interface EntityRow {
@@ -97,45 +94,16 @@ export default function EntityPage() {
         </AddTransactionDialog>
       </div>
 
-      {isParent ? (
-        <Tabs defaultValue="series">
-          <TabsList>
-            <TabsTrigger value="series">Series</TabsTrigger>
-            <TabsTrigger value="properties">Properties</TabsTrigger>
-            <TabsTrigger value="tenants">Tenants</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          </TabsList>
-          <TabsContent value="series">
-            <SeriesGrid parentId={entity.id} />
-          </TabsContent>
-          <TabsContent value="properties">
-            <PropertiesList scope={scope} />
-          </TabsContent>
-          <TabsContent value="tenants">
-            <TenantsList scope={scope} add={{}} />
-          </TabsContent>
-          <TabsContent value="transactions">
-            <TransactionsTable scope={scope} limit={25} title="All transactions" />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <Tabs defaultValue="properties">
-          <TabsList>
-            <TabsTrigger value="properties">Properties</TabsTrigger>
-            <TabsTrigger value="tenants">Tenants</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          </TabsList>
-          <TabsContent value="properties">
-            <PropertiesList scope={scope} />
-          </TabsContent>
-          <TabsContent value="tenants">
-            <TenantsList scope={scope} add={{ entityId: entity.id }} />
-          </TabsContent>
-          <TabsContent value="transactions">
-            <TransactionsTable scope={scope} limit={25} title="Transactions" />
-          </TabsContent>
-        </Tabs>
-      )}
+      <div className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold tracking-tight">
+          {isParent ? "Series" : "Properties"}
+        </h2>
+        {isParent ? (
+          <SeriesGrid parentId={entity.id} />
+        ) : (
+          <PropertiesList scope={scope} />
+        )}
+      </div>
     </div>
   )
 }
