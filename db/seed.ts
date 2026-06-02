@@ -1,5 +1,5 @@
 import type { AppDb } from "./client"
-import { categories, entities, properties, transactions, units } from "./schema"
+import { categories, entities, properties, tenants, transactions, units } from "./schema"
 
 /** ISO date (YYYY-MM-DD) `days` before today. */
 function isoDaysAgo(days: number): string {
@@ -83,6 +83,54 @@ export async function seedIfEmpty(db: AppDb): Promise<void> {
       { propertyId: oakProp.id, label: "Unit D", bedrooms: 1, bathrooms: "1.0", rentAmount: "1150.00" },
     ])
     .returning()
+
+  // --- Tenants: leases tied to units. One unit (Apt 4) is left vacant, and
+  // there's a pending move-in and a past tenant so every status renders. ---
+  await db.insert(tenants).values([
+    {
+      entityId: mapleLlc.id, propertyId: mapleProp.id, unitId: mapleUnits[0].id,
+      name: "Jordan Reyes", email: "jordan.reyes@example.com", phone: "(512) 555-0148",
+      leaseStart: "2024-08-01", leaseEnd: "2025-07-31",
+      rentAmount: mapleUnits[0].rentAmount, status: "active",
+    },
+    {
+      entityId: mapleLlc.id, propertyId: mapleProp.id, unitId: mapleUnits[1].id,
+      name: "Priya Anand", email: "priya.anand@example.com", phone: "(512) 555-0192",
+      leaseStart: "2024-05-15", leaseEnd: "2025-05-14",
+      rentAmount: mapleUnits[1].rentAmount, status: "active",
+    },
+    {
+      entityId: mapleLlc.id, propertyId: mapleProp.id, unitId: mapleUnits[2].id,
+      name: "Marcus Lee", email: "marcus.lee@example.com", phone: "(512) 555-0177",
+      leaseStart: "2023-11-01", leaseEnd: "2025-10-31",
+      rentAmount: mapleUnits[2].rentAmount, status: "active",
+    },
+    // mapleUnits[3] (Apt 4) intentionally left vacant.
+    {
+      entityId: oakLlc.id, propertyId: oakProp.id, unitId: oakUnits[0].id,
+      name: "Sofia Martinez", email: "sofia.martinez@example.com", phone: "(512) 555-0203",
+      leaseStart: "2024-09-01", leaseEnd: "2025-08-31",
+      rentAmount: oakUnits[0].rentAmount, status: "active",
+    },
+    {
+      entityId: oakLlc.id, propertyId: oakProp.id, unitId: oakUnits[1].id,
+      name: "Daniel Kim", email: "daniel.kim@example.com", phone: "(512) 555-0119",
+      leaseStart: isoDaysAgo(-14), leaseEnd: isoDaysAgo(-379),
+      rentAmount: oakUnits[1].rentAmount, status: "pending",
+    },
+    {
+      entityId: oakLlc.id, propertyId: oakProp.id, unitId: oakUnits[2].id,
+      name: "Emily Carter", email: "emily.carter@example.com", phone: "(512) 555-0166",
+      leaseStart: "2024-01-15", leaseEnd: "2025-01-14",
+      rentAmount: oakUnits[2].rentAmount, status: "active",
+    },
+    {
+      entityId: oakLlc.id, propertyId: oakProp.id, unitId: oakUnits[3].id,
+      name: "Tom Becker", email: "tom.becker@example.com", phone: "(512) 555-0140",
+      leaseStart: "2022-06-01", leaseEnd: "2024-05-31",
+      rentAmount: oakUnits[3].rentAmount, status: "past",
+    },
+  ])
 
   // --- Categories (the categorized ledger) ---
   const categoryRows = await db

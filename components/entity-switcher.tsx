@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useLiveQuery } from "@electric-sql/pglite-react"
 
 import {
@@ -18,11 +19,14 @@ interface EntityRow {
 }
 
 /**
- * Switches the active LLC for the whole app. "All entities" gives the
- * consolidated parent-level view; picking a series scopes everything to that
- * child LLC's books. Backed by a live query, so new entities appear instantly.
+ * Quick-jump between LLCs for the whole app. "All entities" goes to the
+ * portfolio home; picking an entity navigates to its detail page (which becomes
+ * the source of truth for scope). The selected value also stays in context so
+ * the Add-Transaction dialog defaults to the right LLC. Backed by a live query,
+ * so new entities appear instantly.
  */
 export function EntitySwitcher({ className }: { className?: string }) {
+  const router = useRouter()
   const { selectedEntityId, setSelectedEntityId } = useSelectedEntity()
   const result = useLiveQuery<EntityRow>(
     `SELECT id, name, type FROM entities
@@ -31,8 +35,13 @@ export function EntitySwitcher({ className }: { className?: string }) {
   )
   const entities = result?.rows ?? []
 
+  function handleChange(value: string) {
+    setSelectedEntityId(value)
+    router.push(value === "all" ? "/" : `/entities/${value}`)
+  }
+
   return (
-    <Select value={selectedEntityId} onValueChange={setSelectedEntityId}>
+    <Select value={selectedEntityId} onValueChange={handleChange}>
       <SelectTrigger size="sm" className={className}>
         <SelectValue placeholder="Select entity" />
       </SelectTrigger>

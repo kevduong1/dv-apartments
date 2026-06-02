@@ -136,6 +136,41 @@ export const transactions = pgTable("transactions", {
   ...syncColumns,
 })
 
+/**
+ * A tenant occupying a unit. Keyed to a `unit`, but also carries the owning
+ * `property_id` and `entity_id` directly (the same denormalization
+ * `transactions` uses) so the drill-down list views can scope by series or
+ * property without extra joins.
+ */
+export const tenants = pgTable(
+  "tenants",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    entityId: uuid("entity_id")
+      .notNull()
+      .references(() => entities.id, { onDelete: "cascade" }),
+    propertyId: uuid("property_id")
+      .notNull()
+      .references(() => properties.id, { onDelete: "cascade" }),
+    unitId: uuid("unit_id").references(() => units.id, { onDelete: "set null" }),
+    name: text("name").notNull(),
+    email: text("email"),
+    phone: text("phone"),
+    leaseStart: date("lease_start"),
+    leaseEnd: date("lease_end"),
+    /** Contract rent for this lease. Stored as a decimal string — never a float. */
+    rentAmount: numeric("rent_amount", { precision: 14, scale: 2 }),
+    status: text("status")
+      .$type<"active" | "pending" | "past">()
+      .notNull()
+      .default("active"),
+    ...syncColumns,
+  },
+  (t) => [
+    check("tenants_status_check", sql`${t.status} in ('active', 'pending', 'past')`),
+  ],
+)
+
 export type Entity = typeof entities.$inferSelect
 export type NewEntity = typeof entities.$inferInsert
 export type Property = typeof properties.$inferSelect
@@ -146,3 +181,5 @@ export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
 export type Transaction = typeof transactions.$inferSelect
 export type NewTransaction = typeof transactions.$inferInsert
+export type Tenant = typeof tenants.$inferSelect
+export type NewTenant = typeof tenants.$inferInsert

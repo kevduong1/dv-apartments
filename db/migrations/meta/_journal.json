@@ -8,6 +8,13 @@
       "when": 1780370293669,
       "tag": "0000_lowly_absorbing_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780376198975,
+      "tag": "0001_loose_phantom_reporter",
+      "breakpoints": true
     }
   ]
 }

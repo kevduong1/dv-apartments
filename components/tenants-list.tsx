@@ -1,0 +1,116 @@
+"use client"
+
+import { useLiveQuery } from "@electric-sql/pglite-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { formatDate, formatMoney } from "@/lib/format"
+import { scopeFilter, type Scope } from "@/lib/scope"
+
+interface TenantRow {
+  id: string
+  name: string
+  status: "active" | "pending" | "past"
+  unitLabel: string | null
+  property: string | null
+  rentAmount: string | null
+  leaseStart: string | null
+  leaseEnd: string | null
+}
+
+const STATUS_VARIANT = {
+  active: "secondary",
+  pending: "outline",
+  past: "ghost",
+} as const
+
+/** Tenants for a series or property, sorted with active leases first. */
+export function TenantsList({ scope }: { scope: Scope }) {
+  const f = scopeFilter(scope, { entityId: "te.entity_id", propertyId: "te.property_id" })
+  const result = useLiveQuery<TenantRow>(
+    `SELECT te.id, te.name, te.status,
+            te.rent_amount AS "rentAmount",
+            te.lease_start AS "leaseStart", te.lease_end AS "leaseEnd",
+            u.label AS "unitLabel", p.name AS property
+     FROM tenants te
+     LEFT JOIN units u ON u.id = te.unit_id
+     LEFT JOIN properties p ON p.id = te.property_id
+     WHERE te.deleted_at IS NULL${f.clause}
+     ORDER BY (te.status = 'active') DESC, (te.status = 'pending') DESC, te.name ASC`,
+    f.params,
+  )
+  const tenants = result?.rows ?? []
+  const showProperty = scope.kind !== "property"
+
+  return (
+    <Card>
+      <CardContent className="px-0 sm:px-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Tenant</TableHead>
+              <TableHead>Unit</TableHead>
+              {showProperty && (
+                <TableHead className="hidden md:table-cell">Property</TableHead>
+              )}
+              <TableHead className="hidden sm:table-cell">Lease</TableHead>
+              <TableHead className="text-right">Rent</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tenants.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={showProperty ? 5 : 4}
+                  className="py-10 text-center text-sm text-muted-foreground"
+                >
+                  No tenants yet.
+                </TableCell>
+              </TableRow>
+            ) : (
+              tenants.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{t.name}</span>
+                      <Badge
+                        variant={STATUS_VARIANT[t.status]}
+                        className="font-normal capitalize"
+                      >
+                        {t.status}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {t.unitLabel ?? "—"}
+                  </TableCell>
+                  {showProperty && (
+                    <TableCell className="hidden text-muted-foreground md:table-cell">
+                      {t.property ?? "—"}
+                    </TableCell>
+                  )}
+                  <TableCell className="hidden whitespace-nowrap text-muted-foreground sm:table-cell">
+                    {t.leaseStart || t.leaseEnd
+                      ? `${formatDate(t.leaseStart)} – ${formatDate(t.leaseEnd)}`
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="text-right font-medium tabular-nums">
+                    {t.rentAmount ? formatMoney(t.rentAmount) : "—"}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
