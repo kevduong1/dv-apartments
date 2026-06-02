@@ -32,7 +32,7 @@ const NAV: NavItem[] = [
   { label: "Transactions", icon: Invoice01Icon },
   { label: "Properties", icon: Building03Icon },
   { label: "Entities", icon: Coins01Icon },
-  { label: "Settings", icon: Settings01Icon },
+  { label: "Settings", icon: Settings01Icon, href: "/settings" },
 ]
 
 function Brand() {
