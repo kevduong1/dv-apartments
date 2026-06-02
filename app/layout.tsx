@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AppShell } from "@/components/app-shell"
 import { EntityProvider } from "@/components/entity-context"
 import { DbProvider } from "@/db/provider"
+import { ServiceWorkerRegister } from "@/components/service-worker-register"
 import { Toaster } from "@/components/ui/sonner"
 
 const fontSans = Nunito_Sans({ subsets: ["latin"], variable: "--font-sans" })
@@ -53,6 +54,7 @@ export default function RootLayout({
             </EntityProvider>
           </DbProvider>
           <Toaster richColors position="top-center" />
+          <ServiceWorkerRegister />
         </ThemeProvider>
       </body>
     </html>
