@@ -63,7 +63,10 @@ export function TenantBalanceSheet({
 
   const rows =
     useLiveQuery<LedgerRow>(
-      `SELECT id, period_month AS "periodMonth",
+      // Cast the date to text: PGlite returns `date` columns as Date objects
+      // through raw queries, but the balance sheet (and the edit dialog it feeds)
+      // treat `periodMonth` as a "YYYY-MM-DD" string and call .slice() on it.
+      `SELECT id, period_month::text AS "periodMonth",
               amount_due AS "amountDue", amount_paid AS "amountPaid", note
        FROM rent_ledger
        WHERE tenant_id = $1 AND deleted_at IS NULL
