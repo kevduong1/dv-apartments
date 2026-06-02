@@ -12,7 +12,6 @@ import {
 
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { useSelectedEntity } from "@/components/entity-context"
-import { ScopedStats } from "@/components/scoped-stats"
 import { SeriesGrid } from "@/components/series-grid"
 import { TransactionsTable } from "@/components/transactions-table"
 import { Button } from "@/components/ui/button"
@@ -85,8 +84,6 @@ export default function HomePage() {
       ) : (
         <Skeleton className="h-24 w-full rounded-4xl" />
       )}
-
-      <ScopedStats scope={{ kind: "all" }} />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold tracking-tight">Series</h2>

@@ -7,9 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import type { IconSvgElement } from "@hugeicons/react"
 import {
   Building03Icon,
-  Coins01Icon,
   Home09Icon,
-  Invoice01Icon,
   Menu01Icon,
   Settings01Icon,
 } from "@hugeicons/core-free-icons"
@@ -29,9 +27,6 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", icon: Home09Icon, href: "/" },
-  { label: "Transactions", icon: Invoice01Icon },
-  { label: "Properties", icon: Building03Icon },
-  { label: "Entities", icon: Coins01Icon },
   { label: "Settings", icon: Settings01Icon, href: "/settings" },
 ]
 

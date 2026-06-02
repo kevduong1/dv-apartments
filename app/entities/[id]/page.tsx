@@ -115,7 +115,7 @@ export default function EntityPage() {
             <PropertiesList scope={scope} />
           </TabsContent>
           <TabsContent value="tenants">
-            <TenantsList scope={scope} />
+            <TenantsList scope={scope} add={{}} />
           </TabsContent>
           <TabsContent value="transactions">
             <TransactionsTable scope={scope} limit={25} title="All transactions" />
@@ -132,7 +132,7 @@ export default function EntityPage() {
             <PropertiesList scope={scope} />
           </TabsContent>
           <TabsContent value="tenants">
-            <TenantsList scope={scope} />
+            <TenantsList scope={scope} add={{ entityId: entity.id }} />
           </TabsContent>
           <TabsContent value="transactions">
             <TransactionsTable scope={scope} limit={25} title="Transactions" />

@@ -1,8 +1,12 @@
 "use client"
 
 import { useLiveQuery } from "@electric-sql/pglite-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { PlusSignIcon } from "@hugeicons/core-free-icons"
 
+import { AddTenantDialog } from "@/components/add-tenant-dialog"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -32,8 +36,17 @@ const STATUS_VARIANT = {
   past: "ghost",
 } as const
 
-/** Tenants for a series or property, sorted with active leases first. */
-export function TenantsList({ scope }: { scope: Scope }) {
+/**
+ * Tenants for a series or property, sorted with active leases first. Pass
+ * `add` to surface an "Add tenant" button (its props pre-scope the dialog).
+ */
+export function TenantsList({
+  scope,
+  add,
+}: {
+  scope: Scope
+  add?: { propertyId?: string; entityId?: string }
+}) {
   const f = scopeFilter(scope, { entityId: "te.entity_id", propertyId: "te.property_id" })
   const result = useLiveQuery<TenantRow>(
     `SELECT te.id, te.name, te.status,
@@ -51,8 +64,19 @@ export function TenantsList({ scope }: { scope: Scope }) {
   const showProperty = scope.kind !== "property"
 
   return (
-    <Card>
-      <CardContent className="px-0 sm:px-6">
+    <div className="flex flex-col gap-3">
+      {add && (
+        <div className="flex justify-end">
+          <AddTenantDialog propertyId={add.propertyId} entityId={add.entityId}>
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
+              Add tenant
+            </Button>
+          </AddTenantDialog>
+        </div>
+      )}
+      <Card>
+        <CardContent className="px-0 sm:px-6">
         <Table>
           <TableHeader>
             <TableRow>
@@ -110,7 +134,8 @@ export function TenantsList({ scope }: { scope: Scope }) {
             )}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

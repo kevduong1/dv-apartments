@@ -122,7 +122,10 @@ export default function PropertyPage() {
           <UnitsTable propertyId={property.id} />
         </TabsContent>
         <TabsContent value="tenants">
-          <TenantsList scope={scope} />
+          <TenantsList
+            scope={scope}
+            add={{ propertyId: property.id, entityId: property.entityId }}
+          />
         </TabsContent>
         <TabsContent value="transactions">
           <TransactionsTable scope={scope} limit={25} title="Transactions" />
