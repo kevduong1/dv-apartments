@@ -2,10 +2,10 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { useLiveQuery } from "@electric-sql/pglite-react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowRight01Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
+import { ArrowRight01Icon, Door01Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
 
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
@@ -16,14 +16,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { formatMoney } from "@/lib/format"
 import type { Scope } from "@/lib/scope"
 
@@ -135,89 +127,82 @@ export default function PropertyPage() {
       ) : (
         <div className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold tracking-tight">Units</h2>
-          <UnitsTable propertyId={property.id} />
+          <UnitsGrid propertyId={property.id} />
         </div>
       )}
     </div>
   )
 }
 
-/** The units within one property, with their current active occupant. */
-function UnitsTable({ propertyId }: { propertyId: string }) {
-  const router = useRouter()
-  const units =
-    useLiveQuery<UnitRow>(
-      `SELECT u.id, u.label, u.bedrooms, u.bathrooms,
-              u.rent_amount AS "rentAmount",
-              (SELECT te.name FROM tenants te
-                 WHERE te.unit_id = u.id AND te.status = 'active'
-                   AND te.deleted_at IS NULL
-                 ORDER BY te.lease_start DESC LIMIT 1) AS tenant
-       FROM units u
-       WHERE u.property_id = $1 AND u.deleted_at IS NULL
-       ORDER BY u.label ASC`,
-      [propertyId],
-    )?.rows ?? []
+/** Clickable cards for the units in one property, with their current occupant. */
+function UnitsGrid({ propertyId }: { propertyId: string }) {
+  const result = useLiveQuery<UnitRow>(
+    `SELECT u.id, u.label, u.bedrooms, u.bathrooms,
+            u.rent_amount AS "rentAmount",
+            (SELECT te.name FROM tenants te
+               WHERE te.unit_id = u.id AND te.status = 'active'
+                 AND te.deleted_at IS NULL
+               ORDER BY te.lease_start DESC LIMIT 1) AS tenant
+     FROM units u
+     WHERE u.property_id = $1 AND u.deleted_at IS NULL
+     ORDER BY u.label ASC`,
+    [propertyId],
+  )
+  const units = result?.rows ?? []
+
+  if (result && units.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-10 text-center text-sm text-muted-foreground">
+          No units yet.
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <Card>
-      <CardContent className="px-0 sm:px-6">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Unit</TableHead>
-              <TableHead className="hidden sm:table-cell">Beds / baths</TableHead>
-              <TableHead>Occupant</TableHead>
-              <TableHead className="text-right">Rent</TableHead>
-              <TableHead className="w-8" aria-label="Open" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {units.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="py-10 text-center text-sm text-muted-foreground"
-                >
-                  No units yet.
-                </TableCell>
-              </TableRow>
-            ) : (
-              units.map((u) => (
-                <TableRow
-                  key={u.id}
-                  onClick={() => router.push(`/units/${u.id}`)}
-                  className="group cursor-pointer"
-                >
-                  <TableCell className="font-medium">{u.label}</TableCell>
-                  <TableCell className="hidden text-muted-foreground sm:table-cell">
-                    {u.bedrooms ?? "—"} bd / {u.bathrooms ?? "—"} ba
-                  </TableCell>
-                  <TableCell>
-                    {u.tenant ? (
-                      u.tenant
-                    ) : (
-                      <Badge variant="outline" className="font-normal text-muted-foreground">
-                        Vacant
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
+    <div className="grid gap-3 sm:grid-cols-2">
+      {units.map((u) => (
+        <Link key={u.id} href={`/units/${u.id}`} className="group block">
+          <Card className="h-full transition-shadow hover:shadow-lg">
+            <CardContent className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                <HugeiconsIcon icon={Door01Icon} className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1 truncate font-medium">
+                  {u.label}
+                  <HugeiconsIcon
+                    icon={ArrowRight01Icon}
+                    className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                  />
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {u.bedrooms ?? "—"} bd / {u.bathrooms ?? "—"} ba
+                </p>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  {u.tenant ? (
+                    <span className="truncate text-xs text-muted-foreground">
+                      {u.tenant}
+                    </span>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="font-normal text-muted-foreground"
+                    >
+                      Vacant
+                    </Badge>
+                  )}
+                  <span className="shrink-0 text-sm font-medium tabular-nums">
                     {u.rentAmount ? formatMoney(u.rentAmount) : "—"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <HugeiconsIcon
-                      icon={ArrowRight01Icon}
-                      className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </div>
   )
 }
 
