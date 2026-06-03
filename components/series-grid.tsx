@@ -55,7 +55,7 @@ export function SeriesGrid({ parentId }: { parentId?: string }) {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {series.map((s) => {
         const net = Number(s.net)
         return (
@@ -102,7 +102,7 @@ export function SeriesGrid({ parentId }: { parentId?: string }) {
 
 function SeriesGridSkeleton() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i} className="h-full">
           <CardContent className="flex items-start gap-3">

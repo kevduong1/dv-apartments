@@ -161,7 +161,7 @@ export function TenantsDirectory() {
             {ranked.length} {ranked.length === 1 ? "tenant" : "tenants"}
             {deferredQuery.trim() ? ` matching “${deferredQuery.trim()}”` : ""}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {ranked.map((r) => (
               <TenantCard key={r.row.id} ranked={r} />
             ))}
@@ -277,7 +277,7 @@ function DirectorySkeleton() {
   return (
     <>
       <Skeleton className="h-4 w-28 rounded-md" />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i} size="sm" className="h-full">
             <CardContent className="flex flex-col gap-3">

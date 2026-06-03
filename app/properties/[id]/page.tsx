@@ -171,7 +171,7 @@ function UnitsGrid({ propertyId }: { propertyId: string }) {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {units.map((u) => (
         <Link key={u.id} href={`/units/${u.id}`} className="group block">
           <Card className="h-full transition-shadow hover:shadow-lg">
@@ -218,7 +218,7 @@ function UnitsGrid({ propertyId }: { propertyId: string }) {
 
 function UnitsGridSkeleton() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i} className="h-full">
           <CardContent className="flex items-start gap-3">

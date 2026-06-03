@@ -54,7 +54,7 @@ export function PropertiesList({ scope }: { scope: Scope }) {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {properties.map((p) => {
         const net = Number(p.net)
         return (
@@ -100,7 +100,7 @@ export function PropertiesList({ scope }: { scope: Scope }) {
 
 function PropertiesListSkeleton() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i} className="h-full">
           <CardContent className="flex items-start gap-3">
