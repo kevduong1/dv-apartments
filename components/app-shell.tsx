@@ -15,7 +15,12 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { EntitySwitcher } from "@/components/entity-switcher"
 import { SyncStatusBadge } from "@/components/sync-status-badge"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -37,13 +42,15 @@ const NAV: NavItem[] = [
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center gap-2">
-      <span className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+    <Link href="/" className="flex min-w-0 items-center gap-2">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <HugeiconsIcon icon={Building03Icon} size={18} />
       </span>
-      <span className="flex flex-col leading-none">
-        <span className="text-sm font-semibold">DV Books</span>
-        <span className="text-[10px] text-muted-foreground">Series LLC ledger</span>
+      <span className="flex min-w-0 flex-col leading-none">
+        <span className="truncate text-sm font-semibold">DV Books</span>
+        <span className="truncate text-[10px] text-muted-foreground">
+          Series LLC ledger
+        </span>
       </span>
     </Link>
   )
@@ -59,7 +66,9 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
       {NAV.map((item) => {
         const active =
           item.href === pathname ||
-          (item.href !== "/" && !!item.href && pathname.startsWith(`${item.href}/`))
+          (item.href !== "/" &&
+            !!item.href &&
+            pathname.startsWith(`${item.href}/`))
         return item.href ? (
           <Link
             key={item.label}
@@ -69,7 +78,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               base,
               active
                 ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             <HugeiconsIcon icon={item.icon} size={18} />
@@ -127,9 +136,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <Brand />
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex min-w-0 items-center gap-2">
           <SyncStatusBadge className="hidden sm:inline-flex" />
-          <EntitySwitcher className="max-w-[42vw] sm:max-w-none" />
+          <EntitySwitcher className="max-w-[42vw] min-w-0 sm:max-w-none" />
           <ThemeToggle />
         </div>
       </header>

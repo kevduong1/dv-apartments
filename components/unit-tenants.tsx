@@ -3,7 +3,11 @@
 import Link from "next/link"
 import { useLiveQuery } from "@electric-sql/pglite-react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowRight01Icon, PlusSignIcon, UserIcon } from "@hugeicons/core-free-icons"
+import {
+  ArrowRight01Icon,
+  PlusSignIcon,
+  UserIcon,
+} from "@hugeicons/core-free-icons"
 
 import { AddTenantDialog } from "@/components/add-tenant-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatDate, formatMoney } from "@/lib/format"
 
 interface TenantRow {
@@ -46,18 +51,17 @@ export function UnitTenants({
   propertyId: string
   entityId: string
 }) {
-  const tenants =
-    useLiveQuery<TenantRow>(
-      `SELECT te.id, te.name, te.status,
+  const tenants = useLiveQuery<TenantRow>(
+    `SELECT te.id, te.name, te.status,
               te.lease_start AS "leaseStart", te.lease_end AS "leaseEnd",
               te.rent_amount AS "rentAmount"
        FROM tenants te
        WHERE te.unit_id = $1 AND te.deleted_at IS NULL
        ORDER BY (te.status = 'active') DESC, te.lease_start DESC NULLS LAST`,
-      [unitId],
-    )?.rows ?? []
+    [unitId]
+  )?.rows
 
-  const current = tenants.find((t) => t.status === "active") ?? null
+  const current = tenants?.find((t) => t.status === "active") ?? null
 
   return (
     <Card>
@@ -77,7 +81,20 @@ export function UnitTenants({
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {tenants.length === 0 ? (
+        {!tenants ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 rounded-2xl border p-3"
+            >
+              <Skeleton className="size-10 shrink-0 rounded-2xl" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-5 w-40 rounded-md" />
+                <Skeleton className="h-4 w-56 rounded-md" />
+              </div>
+            </div>
+          ))
+        ) : tenants.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
             No tenants have leased this unit yet.
           </p>
@@ -92,8 +109,8 @@ export function UnitTenants({
                 <HugeiconsIcon icon={UserIcon} className="size-5" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-2 font-medium">
-                  {t.name}
+                <p className="flex items-center gap-2 font-semibold">
+                  <span className="truncate">{t.name}</span>
                   <Badge
                     variant={STATUS_VARIANT[t.status]}
                     className="font-normal capitalize"
@@ -101,7 +118,7 @@ export function UnitTenants({
                     {t.id === current?.id ? "current" : t.status}
                   </Badge>
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {t.leaseStart || t.leaseEnd
                     ? `${formatDate(t.leaseStart)} – ${formatDate(t.leaseEnd)}`
                     : "No lease dates"}

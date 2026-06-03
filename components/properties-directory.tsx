@@ -79,7 +79,7 @@ export function PropertiesDirectory() {
      FROM properties p
      LEFT JOIN entities e ON e.id = p.entity_id
      WHERE p.deleted_at IS NULL
-     ORDER BY p.name ASC`,
+     ORDER BY p.name ASC`
   )
   const rows = result?.rows
 
@@ -114,7 +114,7 @@ export function PropertiesDirectory() {
         name ? name.score + 4 : 0,
         address?.score ?? 0,
         entity?.score ?? 0,
-        type?.score ?? 0,
+        type?.score ?? 0
       )
       out.push({
         ...base,
@@ -127,7 +127,7 @@ export function PropertiesDirectory() {
     }
 
     return out.sort(
-      (a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name),
+      (a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name)
     )
   }, [rows, deferredQuery])
 
@@ -188,11 +188,11 @@ function PropertyCard({ ranked }: { ranked: Ranked }) {
       <Card size="sm" className="h-full transition-shadow hover:shadow-lg">
         <CardContent className="flex h-full flex-col gap-3">
           <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <HugeiconsIcon icon={Building03Icon} className="size-5" />
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <HugeiconsIcon icon={Building03Icon} className="size-6" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-1 truncate font-medium">
+              <p className="flex items-center gap-1 truncate text-lg font-semibold">
                 <span className="truncate">
                   <Highlight text={row.name} indices={ranked.nameMatch} />
                 </span>
@@ -201,18 +201,27 @@ function PropertyCard({ ranked }: { ranked: Ranked }) {
                   className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
                 />
               </p>
-              <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
-                <HugeiconsIcon icon={Location01Icon} className="size-3.5 shrink-0" />
+              <p className="flex items-center gap-1 truncate text-sm text-muted-foreground">
+                <HugeiconsIcon
+                  icon={Location01Icon}
+                  className="size-4 shrink-0"
+                />
                 <span className="truncate">
                   {ranked.address ? (
-                    <Highlight text={ranked.address} indices={ranked.addressMatch} />
+                    <Highlight
+                      text={ranked.address}
+                      indices={ranked.addressMatch}
+                    />
                   ) : (
                     "No address"
                   )}
                 </span>
               </p>
             </div>
-            <Badge variant="outline" className="shrink-0 font-normal capitalize">
+            <Badge
+              variant="outline"
+              className="shrink-0 font-normal capitalize"
+            >
               {ranked.typeLabel}
             </Badge>
           </div>
@@ -222,32 +231,35 @@ function PropertyCard({ ranked }: { ranked: Ranked }) {
               <Badge variant="outline" className="max-w-full gap-1">
                 <HugeiconsIcon icon={Coins01Icon} className="shrink-0" />
                 <span className="truncate">
-                  <Highlight text={row.entityName} indices={ranked.entityMatch} />
+                  <Highlight
+                    text={row.entityName}
+                    indices={ranked.entityMatch}
+                  />
                 </span>
               </Badge>
             </div>
           )}
 
-          <div className="mt-auto flex items-end justify-between border-t pt-3 text-sm">
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Units</span>
-              <span className="flex items-center gap-1 font-medium tabular-nums">
+          <div className="mt-auto flex items-end justify-between gap-2 border-t pt-3 text-base">
+            <div className="flex min-w-0 flex-col">
+              <span className="text-sm text-muted-foreground">Units</span>
+              <span className="flex items-center gap-1 font-semibold tabular-nums">
                 <HugeiconsIcon
                   icon={Door01Icon}
-                  className="size-3.5 text-muted-foreground"
+                  className="size-4 shrink-0 text-muted-foreground"
                 />
                 {row.units}
                 {row.units > 0 && (
-                  <span className="text-xs font-normal text-muted-foreground">
+                  <span className="truncate text-sm font-normal text-muted-foreground">
                     · {row.occupied} occupied
                   </span>
                 )}
               </span>
             </div>
-            <div className="flex flex-col text-right">
-              <span className="text-xs text-muted-foreground">Net</span>
+            <div className="flex shrink-0 flex-col text-right">
+              <span className="text-sm text-muted-foreground">Net</span>
               <span
-                className={`font-medium tabular-nums ${
+                className={`font-semibold tabular-nums ${
                   net >= 0
                     ? "text-emerald-600 dark:text-emerald-400"
                     : "text-destructive"
@@ -265,11 +277,35 @@ function PropertyCard({ ranked }: { ranked: Ranked }) {
 
 function DirectorySkeleton() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-40 rounded-4xl" />
-      ))}
-    </div>
+    <>
+      <Skeleton className="h-4 w-28 rounded-md" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i} size="sm" className="h-full">
+            <CardContent className="flex flex-col gap-3">
+              <div className="flex items-start gap-3">
+                <Skeleton className="size-11 shrink-0 rounded-2xl" />
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <Skeleton className="h-5 w-3/4 rounded-md" />
+                  <Skeleton className="h-4 w-1/2 rounded-md" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-3xl" />
+              </div>
+              <div className="mt-1 flex items-end justify-between border-t pt-3">
+                <div className="flex flex-col gap-1.5">
+                  <Skeleton className="h-4 w-10 rounded-md" />
+                  <Skeleton className="h-5 w-16 rounded-md" />
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <Skeleton className="h-4 w-10 rounded-md" />
+                  <Skeleton className="h-5 w-20 rounded-md" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </>
   )
 }
 

@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, Coins01Icon } from "@hugeicons/core-free-icons"
 
 import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatMoney } from "@/lib/format"
 
 interface SeriesRow {
@@ -37,14 +38,16 @@ export function SeriesGrid({ parentId }: { parentId?: string }) {
        parentId ? " AND e.parent_id = $1" : ""
      }
      ORDER BY e.name ASC`,
-    parentId ? [parentId] : [],
+    parentId ? [parentId] : []
   )
-  const series = result?.rows ?? []
+  const series = result?.rows
 
-  if (result && series.length === 0) {
+  if (!series) return <SeriesGridSkeleton />
+
+  if (series.length === 0) {
     return (
       <Card>
-        <CardContent className="py-10 text-center text-sm text-muted-foreground">
+        <CardContent className="py-10 text-center text-muted-foreground">
           No series LLCs yet.
         </CardContent>
       </Card>
@@ -59,27 +62,29 @@ export function SeriesGrid({ parentId }: { parentId?: string }) {
           <Link key={s.id} href={`/entities/${s.id}`} className="group block">
             <Card className="h-full transition-shadow hover:shadow-lg">
               <CardContent className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <HugeiconsIcon icon={Coins01Icon} className="size-5" />
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <HugeiconsIcon icon={Coins01Icon} className="size-6" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1 truncate font-medium">
+                  <p className="flex items-center gap-1 truncate text-lg font-semibold">
                     {s.name}
                     <HugeiconsIcon
                       icon={ArrowRight01Icon}
                       className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
                     />
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {s.formationState ? `Formed in ${s.formationState}` : "Series LLC"}
+                  <p className="truncate text-sm text-muted-foreground">
+                    {s.formationState
+                      ? `Formed in ${s.formationState}`
+                      : "Series LLC"}
                   </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     {s.properties} propert{s.properties === 1 ? "y" : "ies"} ·{" "}
                     <span
                       className={
                         net >= 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-destructive"
+                          ? "font-medium text-emerald-600 dark:text-emerald-400"
+                          : "font-medium text-destructive"
                       }
                     >
                       {formatMoney(net)} net
@@ -91,6 +96,25 @@ export function SeriesGrid({ parentId }: { parentId?: string }) {
           </Link>
         )
       })}
+    </div>
+  )
+}
+
+function SeriesGridSkeleton() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="h-full">
+          <CardContent className="flex items-start gap-3">
+            <Skeleton className="size-11 shrink-0 rounded-2xl" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Skeleton className="h-5 w-2/3 rounded-md" />
+              <Skeleton className="h-4 w-1/2 rounded-md" />
+              <Skeleton className="mt-1 h-4 w-3/4 rounded-md" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

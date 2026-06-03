@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -49,9 +50,8 @@ export function TransactionsTable({
     propertyId: "t.property_id",
     unitId: "t.unit_id",
   })
-  const transactions =
-    useLiveQuery<TxRow>(
-      `SELECT t.id, t.occurred_on AS "occurredOn", t.amount, t.memo,
+  const transactions = useLiveQuery<TxRow>(
+    `SELECT t.id, t.occurred_on AS "occurredOn", t.amount, t.memo,
               c.name AS category, c.kind,
               e.name AS entity, p.name AS property
        FROM transactions t
@@ -61,8 +61,8 @@ export function TransactionsTable({
        WHERE t.deleted_at IS NULL${f.clause}
        ORDER BY t.occurred_on DESC, t.created_at DESC
        LIMIT ${Number(limit)}`,
-      f.params,
-    )?.rows ?? []
+    f.params
+  )?.rows
 
   const showEntity = scope.kind === "all" || scope.kind === "parent"
   const colSpan = showEntity ? 5 : 4
@@ -79,13 +79,22 @@ export function TransactionsTable({
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Category</TableHead>
-              {showEntity && <TableHead className="hidden sm:table-cell">Entity</TableHead>}
-              <TableHead className="hidden md:table-cell">Property / memo</TableHead>
+              {showEntity && (
+                <TableHead className="hidden sm:table-cell">Entity</TableHead>
+              )}
+              <TableHead className="hidden md:table-cell">
+                Property / memo
+              </TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.length === 0 ? (
+            {!transactions ? (
+              <TransactionsSkeletonRows
+                rows={Math.min(Number(limit), 6)}
+                showEntity={showEntity}
+              />
+            ) : transactions.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={colSpan}
@@ -121,7 +130,9 @@ export function TransactionsTable({
                     </TableCell>
                     <TableCell
                       className={`text-right font-medium tabular-nums ${
-                        isIncome ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
+                        isIncome
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-foreground"
                       }`}
                     >
                       {isIncome ? "+" : "−"}
@@ -135,5 +146,44 @@ export function TransactionsTable({
         </Table>
       </CardContent>
     </Card>
+  )
+}
+
+/**
+ * Placeholder rows shown while the ledger query is in flight. The columns mirror
+ * {@link TransactionsTable}'s, including which ones collapse on small screens, so
+ * the layout doesn't shift when the real data arrives.
+ */
+function TransactionsSkeletonRows({
+  rows,
+  showEntity,
+}: {
+  rows: number
+  showEntity: boolean
+}) {
+  return (
+    <>
+      {Array.from({ length: Math.max(rows, 1) }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell>
+            <Skeleton className="h-4 w-20 rounded-md" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-5 w-24 rounded-3xl" />
+          </TableCell>
+          {showEntity && (
+            <TableCell className="hidden sm:table-cell">
+              <Skeleton className="h-4 w-24 rounded-md" />
+            </TableCell>
+          )}
+          <TableCell className="hidden md:table-cell">
+            <Skeleton className="h-4 w-40 rounded-md" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="ml-auto h-4 w-16 rounded-md" />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
   )
 }

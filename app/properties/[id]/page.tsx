@@ -5,7 +5,11 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useLiveQuery } from "@electric-sql/pglite-react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowRight01Icon, Door01Icon, PlusSignIcon } from "@hugeicons/core-free-icons"
+import {
+  ArrowRight01Icon,
+  Door01Icon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons"
 
 import { AddTransactionDialog } from "@/components/add-transaction-dialog"
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs"
@@ -52,7 +56,7 @@ export default function PropertyPage() {
      FROM properties p
      LEFT JOIN entities e ON e.id = p.entity_id
      WHERE p.id = $1 AND p.deleted_at IS NULL`,
-    [id],
+    [id]
   )
   const property = result?.rows[0]
 
@@ -63,7 +67,7 @@ export default function PropertyPage() {
     `SELECT id FROM units
      WHERE property_id = $1 AND deleted_at IS NULL
      ORDER BY label ASC`,
-    [id],
+    [id]
   )
 
   // Scope the header switcher + Add-Transaction default to the owning series.
@@ -98,12 +102,16 @@ export default function PropertyPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{property.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {property.name}
+            </h1>
             <Badge variant="outline" className="capitalize">
               {property.propertyType.replace("_", " ")}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">{address || "No address on file"}</p>
+          <p className="text-sm text-muted-foreground">
+            {address || "No address on file"}
+          </p>
         </div>
         <AddTransactionDialog>
           <Button>
@@ -146,14 +154,16 @@ function UnitsGrid({ propertyId }: { propertyId: string }) {
      FROM units u
      WHERE u.property_id = $1 AND u.deleted_at IS NULL
      ORDER BY u.label ASC`,
-    [propertyId],
+    [propertyId]
   )
-  const units = result?.rows ?? []
+  const units = result?.rows
 
-  if (result && units.length === 0) {
+  if (!units) return <UnitsGridSkeleton />
+
+  if (units.length === 0) {
     return (
       <Card>
-        <CardContent className="py-10 text-center text-sm text-muted-foreground">
+        <CardContent className="py-10 text-center text-muted-foreground">
           No units yet.
         </CardContent>
       </Card>
@@ -166,23 +176,23 @@ function UnitsGrid({ propertyId }: { propertyId: string }) {
         <Link key={u.id} href={`/units/${u.id}`} className="group block">
           <Card className="h-full transition-shadow hover:shadow-lg">
             <CardContent className="flex items-start gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                <HugeiconsIcon icon={Door01Icon} className="size-5" />
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                <HugeiconsIcon icon={Door01Icon} className="size-6" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1 truncate font-medium">
+                <p className="flex items-center gap-1 truncate text-lg font-semibold">
                   {u.label}
                   <HugeiconsIcon
                     icon={ArrowRight01Icon}
                     className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
                   />
                 </p>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="truncate text-sm text-muted-foreground">
                   {u.bedrooms ?? "—"} bd / {u.bathrooms ?? "—"} ba
                 </p>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   {u.tenant ? (
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate text-sm text-muted-foreground">
                       {u.tenant}
                     </span>
                   ) : (
@@ -193,7 +203,7 @@ function UnitsGrid({ propertyId }: { propertyId: string }) {
                       Vacant
                     </Badge>
                   )}
-                  <span className="shrink-0 text-sm font-medium tabular-nums">
+                  <span className="shrink-0 text-base font-semibold tabular-nums">
                     {u.rentAmount ? formatMoney(u.rentAmount) : "—"}
                   </span>
                 </div>
@@ -206,13 +216,38 @@ function UnitsGrid({ propertyId }: { propertyId: string }) {
   )
 }
 
+function UnitsGridSkeleton() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="h-full">
+          <CardContent className="flex items-start gap-3">
+            <Skeleton className="size-11 shrink-0 rounded-2xl" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Skeleton className="h-5 w-1/2 rounded-md" />
+              <Skeleton className="h-4 w-1/3 rounded-md" />
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <Skeleton className="h-4 w-2/5 rounded-md" />
+                <Skeleton className="h-5 w-14 rounded-md" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
 function DetailSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Skeleton className="h-5 w-56" />
-      <Skeleton className="h-9 w-64" />
-      <Skeleton className="h-12 w-72 rounded-3xl" />
-      <Skeleton className="h-64 w-full rounded-4xl" />
+      <Skeleton className="h-5 w-56 rounded-md" />
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-8 w-64 rounded-md" />
+        <Skeleton className="h-4 w-48 rounded-md" />
+      </div>
+      <Skeleton className="h-7 w-24 rounded-md" />
+      <UnitsGridSkeleton />
     </div>
   )
 }
@@ -221,7 +256,9 @@ function NotFound() {
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-        <p className="text-sm text-muted-foreground">This property doesn&apos;t exist.</p>
+        <p className="text-sm text-muted-foreground">
+          This property doesn&apos;t exist.
+        </p>
         <Button asChild variant="outline">
           <Link href="/">Back to portfolio</Link>
         </Button>

@@ -12,6 +12,7 @@ import {
 } from "@/components/add-rent-entry-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -61,25 +62,30 @@ export function TenantBalanceSheet({
   const db = useDb()
   const [seeding, setSeeding] = useState(false)
 
-  const rows =
-    useLiveQuery<LedgerRow>(
-      // Cast the date to text: PGlite returns `date` columns as Date objects
-      // through raw queries, but the balance sheet (and the edit dialog it feeds)
-      // treat `periodMonth` as a "YYYY-MM-DD" string and call .slice() on it.
-      `SELECT id, period_month::text AS "periodMonth",
+  const rows = useLiveQuery<LedgerRow>(
+    // Cast the date to text: PGlite returns `date` columns as Date objects
+    // through raw queries, but the balance sheet (and the edit dialog it feeds)
+    // treat `periodMonth` as a "YYYY-MM-DD" string and call .slice() on it.
+    `SELECT id, period_month::text AS "periodMonth",
               amount_due AS "amountDue", amount_paid AS "amountPaid", note
        FROM rent_ledger
        WHERE tenant_id = $1 AND deleted_at IS NULL
        ORDER BY period_month ASC`,
-      [tenantId],
-    )?.rows ?? []
+    [tenantId]
+  )?.rows
 
   // Running balance, computed top-down (oldest first).
-  const withBalance = rows.reduce<(LedgerRow & { balance: number })[]>((acc, r) => {
-    const prev = acc.length > 0 ? acc[acc.length - 1].balance : 0
-    acc.push({ ...r, balance: prev + Number(r.amountDue) - Number(r.amountPaid) })
-    return acc
-  }, [])
+  const withBalance = (rows ?? []).reduce<(LedgerRow & { balance: number })[]>(
+    (acc, r) => {
+      const prev = acc.length > 0 ? acc[acc.length - 1].balance : 0
+      acc.push({
+        ...r,
+        balance: prev + Number(r.amountDue) - Number(r.amountPaid),
+      })
+      return acc
+    },
+    []
+  )
 
   async function handleSeed() {
     if (!leaseStart) {
@@ -94,7 +100,9 @@ export function TenantBalanceSheet({
         rentAmount: rentAmount ? Number(rentAmount).toFixed(2) : "0.00",
       })
       toast.success(
-        created > 0 ? `Added ${created} month${created === 1 ? "" : "s"}.` : "Already up to date.",
+        created > 0
+          ? `Added ${created} month${created === 1 ? "" : "s"}.`
+          : "Already up to date."
       )
     } catch (error) {
       toast.error("Couldn't set up months", {
@@ -137,7 +145,27 @@ export function TenantBalanceSheet({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {withBalance.length === 0 ? (
+              {!rows ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24 rounded-md" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="ml-auto h-4 w-16 rounded-md" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="ml-auto h-4 w-16 rounded-md" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="ml-auto h-4 w-16 rounded-md" />
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Skeleton className="h-4 w-32 rounded-md" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : withBalance.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}

@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, Building03Icon } from "@hugeicons/core-free-icons"
 
 import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatMoney } from "@/lib/format"
 import { scopeFilter, type Scope } from "@/lib/scope"
 
@@ -36,14 +37,16 @@ export function PropertiesList({ scope }: { scope: Scope }) {
      FROM properties p
      WHERE p.deleted_at IS NULL${f.clause}
      ORDER BY p.name ASC`,
-    f.params,
+    f.params
   )
-  const properties = result?.rows ?? []
+  const properties = result?.rows
 
-  if (result && properties.length === 0) {
+  if (!properties) return <PropertiesListSkeleton />
+
+  if (properties.length === 0) {
     return (
       <Card>
-        <CardContent className="py-10 text-center text-sm text-muted-foreground">
+        <CardContent className="py-10 text-center text-muted-foreground">
           No properties yet.
         </CardContent>
       </Card>
@@ -58,27 +61,28 @@ export function PropertiesList({ scope }: { scope: Scope }) {
           <Link key={p.id} href={`/properties/${p.id}`} className="group block">
             <Card className="h-full transition-shadow hover:shadow-lg">
               <CardContent className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                  <HugeiconsIcon icon={Building03Icon} className="size-5" />
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                  <HugeiconsIcon icon={Building03Icon} className="size-6" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1 truncate font-medium">
+                  <p className="flex items-center gap-1 truncate text-lg font-semibold">
                     {p.name}
                     <HugeiconsIcon
                       icon={ArrowRight01Icon}
                       className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
                     />
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {[p.address, p.city, p.state].filter(Boolean).join(", ") || "No address"}
+                  <p className="truncate text-sm text-muted-foreground">
+                    {[p.address, p.city, p.state].filter(Boolean).join(", ") ||
+                      "No address"}
                   </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     {p.units} unit{p.units === 1 ? "" : "s"} ·{" "}
                     <span
                       className={
                         net >= 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-destructive"
+                          ? "font-medium text-emerald-600 dark:text-emerald-400"
+                          : "font-medium text-destructive"
                       }
                     >
                       {formatMoney(net)} net
@@ -90,6 +94,25 @@ export function PropertiesList({ scope }: { scope: Scope }) {
           </Link>
         )
       })}
+    </div>
+  )
+}
+
+function PropertiesListSkeleton() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="h-full">
+          <CardContent className="flex items-start gap-3">
+            <Skeleton className="size-11 shrink-0 rounded-2xl" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Skeleton className="h-5 w-2/3 rounded-md" />
+              <Skeleton className="h-4 w-3/4 rounded-md" />
+              <Skeleton className="mt-1 h-4 w-1/2 rounded-md" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

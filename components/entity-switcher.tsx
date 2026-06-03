@@ -31,7 +31,7 @@ export function EntitySwitcher({ className }: { className?: string }) {
   const result = useLiveQuery<EntityRow>(
     `SELECT id, name, type FROM entities
      WHERE deleted_at IS NULL
-     ORDER BY (type = 'parent') DESC, name ASC`,
+     ORDER BY (type = 'parent') DESC, name ASC`
   )
   const entities = result?.rows ?? []
 
@@ -46,7 +46,7 @@ export function EntitySwitcher({ className }: { className?: string }) {
         <SelectValue placeholder="Select entity" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">All entities (consolidated)</SelectItem>
+        <SelectItem value="all">All entities</SelectItem>
         {entities.map((entity) => (
           <SelectItem key={entity.id} value={entity.id}>
             {entity.type === "series" ? `↳ ${entity.name}` : entity.name}
