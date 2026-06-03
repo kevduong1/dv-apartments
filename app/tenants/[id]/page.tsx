@@ -10,14 +10,14 @@ import { useSelectedEntity } from "@/components/entity-context"
 import { TenantBalanceSheet } from "@/components/tenant-balance-sheet"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { StatCard } from "@/components/stat-card"
 import {
-  ChartLineData01Icon,
-  Coins01Icon,
-  Wallet01Icon,
-} from "@hugeicons/core-free-icons"
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { formatDate, formatMoney } from "@/lib/format"
 
 interface TenantRow {
@@ -112,6 +112,23 @@ export default function TenantPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tenant details</CardTitle>
+          <CardAction>
+            <div className="flex flex-col items-end">
+              <span className="text-xs text-muted-foreground">Balance</span>
+              <span
+                className={`text-2xl font-semibold tabular-nums ${
+                  balance > 0
+                    ? "text-destructive"
+                    : "text-emerald-600 dark:text-emerald-400"
+                }`}
+              >
+                {formatMoney(balance)}
+              </span>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {formatMoney(paid)} paid of {formatMoney(due)}
+              </span>
+            </div>
+          </CardAction>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
@@ -141,21 +158,6 @@ export default function TenantPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        <StatCard label="Charged" icon={Coins01Icon} value={formatMoney(due)} />
-        <StatCard label="Paid" icon={Wallet01Icon} value={formatMoney(paid)} />
-        <StatCard
-          label="Balance"
-          icon={ChartLineData01Icon}
-          value={formatMoney(balance)}
-          accent={
-            balance > 0
-              ? "text-destructive"
-              : "text-emerald-600 dark:text-emerald-400"
-          }
-        />
-      </div>
-
       <TenantBalanceSheet
         tenantId={tenant.id}
         leaseStart={tenant.leaseStart}
@@ -180,11 +182,6 @@ function DetailSkeleton() {
       <Skeleton className="h-5 w-64" />
       <Skeleton className="h-9 w-48" />
       <Skeleton className="h-40 w-full rounded-4xl" />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-4xl" />
-        ))}
-      </div>
       <Skeleton className="h-64 w-full rounded-4xl" />
     </div>
   )

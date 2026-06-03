@@ -11,6 +11,7 @@ import {
   Home09Icon,
   Menu01Icon,
   Settings01Icon,
+  UserMultipleIcon,
 } from "@hugeicons/core-free-icons"
 
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", icon: Home09Icon, href: "/" },
+  { label: "Tenants", icon: UserMultipleIcon, href: "/tenants" },
   { label: "Finances", icon: ChartLineData01Icon, href: "/finances" },
   { label: "Settings", icon: Settings01Icon, href: "/settings" },
 ]
@@ -53,15 +55,18 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <nav className="flex flex-col gap-1">
-      {NAV.map((item) =>
-        item.href ? (
+      {NAV.map((item) => {
+        const active =
+          item.href === pathname ||
+          (item.href !== "/" && !!item.href && pathname.startsWith(`${item.href}/`))
+        return item.href ? (
           <Link
             key={item.label}
             href={item.href}
             onClick={onNavigate}
             className={cn(
               base,
-              pathname === item.href
+              active
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
@@ -81,8 +86,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               Soon
             </span>
           </div>
-        ),
-      )}
+        )
+      })}
     </nav>
   )
 }
