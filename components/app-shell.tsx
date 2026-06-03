@@ -29,6 +29,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", icon: Home09Icon, href: "/" },
+  { label: "Properties", icon: Building03Icon, href: "/properties" },
   { label: "Tenants", icon: UserMultipleIcon, href: "/tenants" },
   { label: "Finances", icon: ChartLineData01Icon, href: "/finances" },
   { label: "Settings", icon: Settings01Icon, href: "/settings" },
