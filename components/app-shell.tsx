@@ -30,11 +30,18 @@ interface NavItem {
   label: string
   icon: IconSvgElement
   href?: string
+  /** Extra path prefixes that should also mark this item active. */
+  match?: string[]
 }
 
 const NAV: NavItem[] = [
-  { label: "Dashboard", icon: Home09Icon, href: "/" },
-  { label: "Properties", icon: Building03Icon, href: "/properties" },
+  {
+    label: "Properties",
+    icon: Building03Icon,
+    href: "/",
+    match: ["/properties"],
+  },
+  { label: "Dashboard", icon: Home09Icon, href: "/dashboard" },
   { label: "Tenants", icon: UserMultipleIcon, href: "/tenants" },
   { label: "Finances", icon: ChartLineData01Icon, href: "/finances" },
   { label: "Settings", icon: Settings01Icon, href: "/settings" },
@@ -68,7 +75,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           item.href === pathname ||
           (item.href !== "/" &&
             !!item.href &&
-            pathname.startsWith(`${item.href}/`))
+            pathname.startsWith(`${item.href}/`)) ||
+          (item.match?.some(
+            (m) => pathname === m || pathname.startsWith(`${m}/`)
+          ) ??
+            false)
         return item.href ? (
           <Link
             key={item.label}
