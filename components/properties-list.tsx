@@ -58,8 +58,12 @@ export function PropertiesList({ scope }: { scope: Scope }) {
       {properties.map((p) => {
         const net = Number(p.net)
         return (
-          <Link key={p.id} href={`/properties/${p.id}`} className="group block">
-            <Card className="h-full transition-shadow hover:shadow-lg">
+          <Link
+            key={p.id}
+            href={`/properties/${p.id}`}
+            className="group block rounded-4xl outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
               <CardContent className="flex items-start gap-3">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
                   <HugeiconsIcon icon={Building03Icon} className="size-6" />

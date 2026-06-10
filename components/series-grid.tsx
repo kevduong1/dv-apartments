@@ -59,8 +59,12 @@ export function SeriesGrid({ parentId }: { parentId?: string }) {
       {series.map((s) => {
         const net = Number(s.net)
         return (
-          <Link key={s.id} href={`/entities/${s.id}`} className="group block">
-            <Card className="h-full transition-shadow hover:shadow-lg">
+          <Link
+            key={s.id}
+            href={`/entities/${s.id}`}
+            className="group block rounded-4xl outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
               <CardContent className="flex items-start gap-3">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <HugeiconsIcon icon={Coins01Icon} className="size-6" />

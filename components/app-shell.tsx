@@ -59,7 +59,7 @@ function Brand() {
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
   const base =
-    "flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-colors"
+    "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[0.9375rem] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60"
 
   return (
     <nav className="flex flex-col gap-1">
@@ -77,7 +77,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             className={cn(
               base,
               active
-                ? "bg-muted text-foreground"
+                ? "bg-primary/10 font-semibold text-primary"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >

@@ -35,7 +35,7 @@ export default function HomePage() {
      FROM entities
      WHERE deleted_at IS NULL AND type = 'parent'
      ORDER BY created_at ASC
-     LIMIT 1`,
+     LIMIT 1`
   )?.rows[0]
 
   return (
@@ -56,8 +56,11 @@ export default function HomePage() {
       </div>
 
       {parent ? (
-        <Link href={`/entities/${parent.id}`} className="group block">
-          <Card className="bg-primary text-primary-foreground transition-shadow hover:shadow-lg">
+        <Link
+          href={`/entities/${parent.id}`}
+          className="group block rounded-4xl outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <Card className="bg-primary text-primary-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
             <CardContent className="flex items-center gap-4">
               <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-foreground/15">
                 <HugeiconsIcon icon={Building03Icon} className="size-6" />

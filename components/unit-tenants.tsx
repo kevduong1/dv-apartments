@@ -103,7 +103,7 @@ export function UnitTenants({
             <Link
               key={t.id}
               href={`/tenants/${t.id}`}
-              className="group flex items-center gap-3 rounded-2xl border p-3 transition-colors hover:bg-muted"
+              className="group flex items-center gap-3 rounded-2xl border p-3 transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/60"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
                 <HugeiconsIcon icon={UserIcon} className="size-5" />

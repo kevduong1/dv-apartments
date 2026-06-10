@@ -184,8 +184,14 @@ function PropertyCard({ ranked }: { ranked: Ranked }) {
   const net = Number(row.net)
 
   return (
-    <Link href={`/properties/${row.id}`} className="group block">
-      <Card size="sm" className="h-full transition-shadow hover:shadow-lg">
+    <Link
+      href={`/properties/${row.id}`}
+      className="group block rounded-4xl outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <Card
+        size="sm"
+        className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      >
         <CardContent className="flex h-full flex-col gap-3">
           <div className="flex items-start gap-3">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
